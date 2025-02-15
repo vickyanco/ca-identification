@@ -7,13 +7,11 @@ import numpy as np
 from .base_preprocessor import BasePreprocessor
 
 class T1Preprocessor(BasePreprocessor):
-    def preprocess(self, file_path):
-        image = self.load_nifti(file_path)
-        image = self.resize_image(image)
-
-        # Z-score normalization
+    def preprocess(self, image):
+        """
+        Normalize and resize the image.
+        """
+        image = self.resize_image(image)  # Ensure uniform size
         mean = np.mean(image)
         std = np.std(image)
-        image = (image - mean) / (std + 1e-8)
-
-        return image
+        return (image - mean) / (std + 1e-8)  # Z-score normalization

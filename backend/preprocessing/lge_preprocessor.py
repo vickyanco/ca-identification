@@ -7,11 +7,9 @@ import numpy as np
 from .base_preprocessor import BasePreprocessor
 
 class LGEPreprocessor(BasePreprocessor):
-    def preprocess(self, file_path):
-        image = self.load_nifti(file_path)
-        image = self.resize_image(image)
-
-        # Normalización Min-Max (0 a 1)
-        image = (image - np.min(image)) / (np.max(image) - np.min(image) + 1e-8)
-        
-        return image
+    def preprocess(self, image):
+        """
+        Normalize and resize the image.
+        """
+        image = self.resize_image(image)  # Ensure uniform size
+        return (image - np.min(image)) / (np.max(image) - np.min(image) + 1e-8)  # Min-Max normalization
