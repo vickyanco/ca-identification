@@ -78,21 +78,21 @@ class DataLoader:
         print(f"✅ Final Case Image Shape: {np.array(case_images, dtype=object).shape}")
         print(f"✅ Final Control Image Shape: {np.array(control_images, dtype=object).shape}")
 
-
         # Convert to NumPy arrays
         try:
-            X = np.array(case_images + control_images)
-            y = np.array([1] * len(case_images) + [0] * len(control_images))
+            X = np.array(case_images + control_images, dtype=np.float32)  # Ensure dtype
+            y = np.array([1] * len(case_images) + [0] * len(control_images), dtype=np.int32)  # Ensure labels exist
         except ValueError as e:
             print("🚨 Shape Mismatch Detected! Cannot stack images into an array.")
             raise e
+
+        print(f"✅ Final Dataset Shapes: X={X.shape}, y={y.shape}")  # Debugging
 
         # Compute class weights
         class_weights = compute_class_weight("balanced", classes=np.unique(y), y=y)
         class_weight_dict = {i: class_weights[i] for i in range(len(class_weights))}
 
         return X, y, class_weight_dict
-
 
     def load_all_data(self):
         """Loads LGE and T1 Mapping data separately and returns both datasets."""

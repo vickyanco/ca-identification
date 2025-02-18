@@ -7,9 +7,17 @@ import numpy as np
 from .base_preprocessor import BasePreprocessor
 
 class LGEPreprocessor(BasePreprocessor):
+    def __init__(self, target_shape=(172, 192, 12)):
+        super().__init__(target_shape)  # Pass the target shape
+
     def preprocess(self, image):
         """
         Normalize and resize the image.
         """
         image = self.resize_image(image)  # Ensure uniform size
-        return (image - np.min(image)) / (np.max(image) - np.min(image) + 1e-8)  # Min-Max normalization
+        min_val, max_val = np.min(image), np.max(image)
+        if max_val > min_val:
+            image = (image - min_val) / (max_val - min_val)
+        else:
+            image = np.zeros_like(image)  # If max == min, set all pixels to 0
+        return image
