@@ -3,16 +3,30 @@
 # author: María Victoria Anconetani
 # date: 19/02/2025
 
-import nibabel as nib
 import os
+import nibabel as nib
 
-# Path to your NIfTI file
-nii_file_2 = r"E:/CA EN CMR/T1Map T1 4cam_nii/p26_control_2.nii.gz"
-nii_file = r"E:/CA EN CMR/DE_SS_EC_tfi_psir_p2_PSIR_nii/p3_caso_real.nii.gz"
+def print_nifti_shapes(folder_path):
+    """Prints the shape of all NIfTI (.nii or .nii.gz) files inside a folder."""
+    
+    # List all files in the directory
+    nifti_files = [f for f in os.listdir(folder_path) if f.endswith('.nii') or f.endswith('.nii.gz')]
+    
+    if not nifti_files:
+        print("No NIfTI files found in the folder.")
+        return
+    
+    # Loop through each file and print its shape
+    for file in nifti_files:
+        file_path = os.path.join(folder_path, file)
+        try:
+            nifti_image = nib.load(file_path)  # Load the NIfTI file
+            shape = nifti_image.get_fdata().shape  # Get the shape of the image
+            print(f"File: {file}, Shape: {shape}")
+        except Exception as e:
+            print(f"Error loading {file}: {e}")
 
-# Load NIfTI file
-nii_img = nib.load(nii_file)
+# Example usage
+folder_path = "E:/CA EN CMR/DE_SS_EC_tfi_psir_p2_PSIR_nii"  
+print_nifti_shapes(folder_path)
 
-# Get shape
-print(f"File: {os.path.basename(nii_file)}")
-print(f"NIfTI shape: {nii_img.shape}")  # This should be (X, Y, Z), where Z > 1 for a 3D volume
