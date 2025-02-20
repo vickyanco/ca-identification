@@ -1,4 +1,4 @@
-# file: preprocessing/metadata_check.py
+# file: utils/metadata_check.py
 # description: Extract metadata from DICOM files.
 # author: María Victoria Anconetani
 # date: 19/02/2025

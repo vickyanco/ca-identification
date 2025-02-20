@@ -1,4 +1,4 @@
-# file: preprocessing/print.py
+# file: utils/print.py
 # description: Count files in subfolders (to check data distribution).
 # author: María Victoria Anconetani
 # date: 19/02/2025

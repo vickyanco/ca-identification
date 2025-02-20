@@ -1,4 +1,4 @@
-# file: preprocessing/dcm_to_nii.py
+# file: utils/dcm_to_nii.py
 # description: Convert DICOM files to NIfTI format using dcm2niix.
 # author: María Victoria Anconetani
 # date: 19/02/2025

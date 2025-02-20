@@ -1,4 +1,4 @@
-# file: preprocessing/check_shape.py
+# file: utils/check_shape.py
 # description: Check the shape of a NIfTI file.
 # author: María Victoria Anconetani
 # date: 19/02/2025
