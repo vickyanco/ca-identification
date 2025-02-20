@@ -35,8 +35,10 @@ def convert_all_to_nifti(input_folder, output_folder):
         ], check=True)
 
 if __name__ == "__main__":
-    input_folder = r"E:/CA EN CMR/T1Map T1 4cam_dcm"
-    output_folder = r"E:/CA EN CMR/T1Map T1 4cam_nii"  # All files together
+    input_folder_2 = r"E:/CA EN CMR/T1Map T1 4cam_dcm"
+    input_folder = r"E:/CA EN CMR/DE_SS_EC_tfi_psir_p2_PSIR_dcm"
+    output_folder_2 = r"E:/CA EN CMR/T1Map T1 4cam_nii"
+    output_folder = r"E:/CA EN CMR/DE_SS_EC_tfi_psir_p2_PSIR_nii"   
 
     convert_all_to_nifti(input_folder, output_folder)
     print("✅ NIfTI conversion completed! All files are in:", output_folder)
