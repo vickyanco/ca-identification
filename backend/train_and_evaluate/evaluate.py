@@ -1,3 +1,8 @@
+# file: train/evaluate.py
+# description: Script to evaluate the LGE model.
+# author: María Victoria Anconetani
+# date: 20/02/2025
+
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
