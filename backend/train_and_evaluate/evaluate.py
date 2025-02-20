@@ -5,11 +5,11 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from backend.preprocessing.load_data import LGEDataLoader
 
 # Load dataset
-dataset_root = "path/to/dataset_root"  # Change this to your dataset path
+dataset_root = "E:/CA EN CMR/LGE_prep_nii_divided"
 data_loader = LGEDataLoader(dataset_root)
 data_loader.prepare_datasets()
 
-test_dataset = data_loader.get_test_dataset()
+test_dataset = data_loader.test_dataset
 
 # Load trained model
 model = tf.keras.models.load_model("lge_cnn_model.h5")

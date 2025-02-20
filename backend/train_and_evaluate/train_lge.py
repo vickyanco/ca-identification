@@ -4,7 +4,7 @@
 # date: 20/02/2025
 
 from backend.preprocessing.load_data import LGEDataLoader
-from backend.model.lge_model import LGE_CNN 
+from backend.model.lge_model import LGE_CNN
 
 # Load dataset
 dataset_root = "E:/CA EN CMR/LGE_prep_nii_divided" 
