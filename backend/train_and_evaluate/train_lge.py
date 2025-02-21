@@ -26,7 +26,7 @@ print("✅ Class Distribution:", dict(zip(unique, counts)))
 
 # Compute class weights based on training data
 class_weights = compute_class_weight("balanced", classes=np.unique(y_train), y=y_train)
-class_weight_dict = {0: class_weights[0] * 1.5, 1: class_weights[1] * 0.5}
+class_weight_dict = {0: class_weights[0] * 1.2, 1: class_weights[1] * 1.2}
 
 print("✅ Computed Class Weights:", class_weight_dict)
 

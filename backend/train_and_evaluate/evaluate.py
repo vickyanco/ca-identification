@@ -28,7 +28,7 @@ for images, labels in test_dataset:
 
 y_true = np.array(y_true)
 y_pred_probs = np.array(y_pred_probs)
-y_pred_labels = (y_pred_probs > 0.55).astype(int)
+y_pred_labels = (y_pred_probs > 0.48).astype(int)
 
 # Compute Metrics
 accuracy = accuracy_score(y_true, y_pred_labels)
