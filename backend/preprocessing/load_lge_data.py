@@ -1,4 +1,4 @@
-# file: utils/loads.py
+# file: preprocessing/load_lge_data.py
 # description: Utility functions to load and preprocess NIfTI files.
 # author: María Victoria Anconetani
 # date: 20/02/2025

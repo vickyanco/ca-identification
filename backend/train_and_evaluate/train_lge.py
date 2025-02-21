@@ -4,7 +4,7 @@
 # date: 20/02/2025
 
 from sklearn.utils.class_weight import compute_class_weight
-from backend.preprocessing.load_data import LGEDataLoader
+from backend.preprocessing.load_lge_data import LGEDataLoader
 from backend.model.lge_model import LGE_CNN
 import numpy as np
 import tensorflow as tf

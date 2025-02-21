@@ -7,7 +7,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve, auc
-from backend.preprocessing.load_data import LGEDataLoader
+from backend.preprocessing.load_lge_data import LGEDataLoader
 
 # Load dataset
 dataset_root = "E:/CA EN CMR/LGE_prep_nii_divided"
