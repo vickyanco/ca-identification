@@ -8,7 +8,7 @@ import numpy as np
 import pydicom
 import tensorflow as tf
 
-class DICOMDataLoader:
+class T1DataLoader:
     def __init__(self, dataset_root, input_shape=(256, 256, 1), batch_size=8):
         """
         Initializes the DICOM data loader for CNN training.
@@ -80,7 +80,7 @@ class DICOMDataLoader:
         """
         # Load datasets
         train_data = self.load_dataset_from_folder(self.train_case_dir, 1) + \
-                     self.load_dataset_from_folder(self.train_control_dir, 0)
+                    self.load_dataset_from_folder(self.train_control_dir, 0)
         test_data = self.load_dataset_from_folder(self.test_case_dir, 1) + \
                     self.load_dataset_from_folder(self.test_control_dir, 0)
 
