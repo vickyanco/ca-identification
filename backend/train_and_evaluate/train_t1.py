@@ -27,16 +27,25 @@ unique, counts = np.unique(y_train, return_counts=True)
 print("✅ Unique Classes in y_train:", unique)
 print("✅ Class Counts:", counts)
 
+# Compute class weights safely
 unique_classes = np.unique(y_train)
+print("✅ Unique Classes in y_train:", unique_classes)
+print("✅ Class Counts:", np.bincount(y_train))  # Show count per class
 
 if len(unique_classes) < 2:
     print("🚨 WARNING: Only one class found in y_train! Defaulting to equal class weights.")
     class_weight_dict = {0: 1.0, 1: 1.0}  # Set equal weights
 else:
     class_weights = compute_class_weight("balanced", classes=unique_classes, y=y_train)
-    class_weight_dict = {0: class_weights[0] * 1.2, 1: class_weights[1] * 1.2}
+    print("✅ Raw Class Weights:", class_weights)  # Debugging line
 
-print("✅ Computed Class Weights:", class_weight_dict)
+    # Increase weight for class 1 slightly to boost recall
+    class_weight_dict = {
+        0: class_weights[0] * 1.0,  # No change for class 0
+        1: class_weights[1] * 1.5   # Increase positive class weight
+    }
+
+print("✅ Adjusted Class Weights:", class_weight_dict)
 
 # Initialize 2D CNN model
 model = T1MappingCNN()

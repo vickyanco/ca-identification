@@ -40,7 +40,6 @@ class T1DataLoader:
         Returns:
             np.array: Preprocessed image data, or None if an error occurs.
         """
-        print(f"📂 Trying to read: {filepath}")
 
         try:
             ds = pydicom.dcmread(filepath)
@@ -53,7 +52,6 @@ class T1DataLoader:
             # Expand dimensions for CNN input (H, W, 1)
             img = np.expand_dims(img, axis=-1)
 
-            print(f"✅ Successfully loaded: {filepath}")
             return img
         
         except Exception as e:
@@ -111,13 +109,8 @@ class T1DataLoader:
 
         # Ensure both classes exist in training
         y_train = [label for _, label in train_data]
-        unique_classes = np.unique(y_train)
-
-        if len(unique_classes) < 2:
-            print(f"🚨 WARNING: Only one class found in training! Unique labels: {unique_classes}")
-            print("❌ ERROR: Check dataset split. Ensure both `train_casos` and `train_controles` contain images.")
-            exit(1)
-
+        if 0 not in y_train or 1 not in y_train:
+            raise ValueError("🚨 ERROR: Both classes must be present in training")
         # Shuffle training data
         np.random.shuffle(train_data)
 

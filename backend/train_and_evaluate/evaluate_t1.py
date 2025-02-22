@@ -7,10 +7,10 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
-from preprocessing.load_t1_data import T1DataLoader
+from backend.preprocessing.load_t1_data import T1DataLoader
 
 # Load dataset
-dataset_root = "E:/CA_EN_CMR/T1Map_pre"
+dataset_root = "E:/CA EN CMR/T1Map_prepro/"
 data_loader = T1DataLoader(dataset_root)
 data_loader.prepare_datasets()
 
