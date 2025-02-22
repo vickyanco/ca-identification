@@ -39,10 +39,9 @@ else:
     class_weights = compute_class_weight("balanced", classes=unique_classes, y=y_train)
     print("✅ Raw Class Weights:", class_weights)  # Debugging line
 
-    # Increase weight for class 1 slightly to boost recall
     class_weight_dict = {
-        0: class_weights[0] * 1.0,  # No change for class 0
-        1: class_weights[1] * 1.5   # Increase positive class weight
+        0: class_weights[0] * 1.0,  
+        1: class_weights[1] * 1.3   
     }
 
 print("✅ Adjusted Class Weights:", class_weight_dict)
