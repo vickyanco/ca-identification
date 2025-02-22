@@ -1,4 +1,4 @@
-# file: train/evaluate.py
+# file: train_and_evaluate/evaluate_t1.py
 # description: Script to evaluate the LGE model.
 # author: María Victoria Anconetani
 # date: 20/02/2025
@@ -6,18 +6,18 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve, auc
-from backend.preprocessing.load_lge_data import LGEDataLoader
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+from preprocessing.load_t1_data import T1DataLoader
 
 # Load dataset
-dataset_root = "E:/CA EN CMR/LGE_prep_nii_divided"
-data_loader = LGEDataLoader(dataset_root)
+dataset_root = "E:/CA_EN_CMR/T1Map_pre"
+data_loader = T1DataLoader(dataset_root)
 data_loader.prepare_datasets()
 
 test_dataset = data_loader.test_dataset
 
 # Load trained model
-model = tf.keras.models.load_model("lge_cnn_model.h5")
+model = tf.keras.models.load_model("t1_mapping_cnn_model.h5")
 
 # Evaluate model
 y_true, y_pred_probs = [], []

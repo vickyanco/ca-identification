@@ -3,13 +3,13 @@
 # author: María Victoria Anconetani
 # date: 20/02/2025
 
-from sklearn.utils.class_weight import compute_class_weight
 from backend.preprocessing.load_lge_data import LGEDataLoader
 from backend.model.lge_model import LGE_CNN
-import numpy as np
-import tensorflow as tf
+from sklearn.utils.class_weight import compute_class_weight
 from tensorflow.keras.callbacks import EarlyStopping # type: ignore
 from tensorflow.keras.optimizers import Adam # type: ignore
+import tensorflow as tf
+import numpy as np
 
 # Load dataset
 dataset_root = "E:/CA EN CMR/LGE_prep_nii_divided"  
