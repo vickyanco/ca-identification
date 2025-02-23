@@ -14,7 +14,7 @@ import os
 
 # Load dataset
 dataset_root = r"E:/CA EN CMR/T1Map_prepro/"  
-data_loader = T1DataLoader(dataset_root, batch_size=6)
+data_loader = T1DataLoader(dataset_root)
 data_loader.prepare_datasets()
 
 train_dataset = data_loader.train_dataset
@@ -41,7 +41,7 @@ else:
 
     class_weight_dict = {
         0: class_weights[0] * 1.0,  
-        1: class_weights[1] * 1.5   
+        1: class_weights[1] * 1.45   
     }
 
 print("✅ Adjusted Class Weights:", class_weight_dict)

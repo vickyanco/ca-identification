@@ -7,7 +7,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, models, regularizers # type: ignore
 
 class T1MappingCNN:
-    def __init__(self, input_shape=(256, 256, 1), num_classes=1, dropout_rate=0.25, l2_reg=3e-4, initial_lr=1e-4):
+    def __init__(self, input_shape=(256, 256, 1), num_classes=1, dropout_rate=0.3, l2_reg=3e-4, initial_lr=1e-4):
         self.input_shape = input_shape
         self.num_classes = num_classes
         self.dropout_rate = dropout_rate
