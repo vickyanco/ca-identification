@@ -41,7 +41,7 @@ else:
 
     class_weight_dict = {
         0: class_weights[0] * 1.0,  
-        1: class_weights[1] * 1.3   
+        1: class_weights[1] * 1.4   
     }
 
 print("✅ Adjusted Class Weights:", class_weight_dict)
