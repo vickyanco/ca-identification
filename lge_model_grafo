@@ -1,0 +1,38 @@
+// Model Architecture
+digraph {
+	L0 [label="conv3d_4
+N/A" shape=box]
+	L1 [label="batch_normalization_4
+N/A" shape=box]
+	L2 [label="conv3d_5
+N/A" shape=box]
+	L3 [label="batch_normalization_5
+N/A" shape=box]
+	L4 [label="conv3d_6
+N/A" shape=box]
+	L5 [label="batch_normalization_6
+N/A" shape=box]
+	L6 [label="conv3d_7
+N/A" shape=box]
+	L7 [label="batch_normalization_7
+N/A" shape=box]
+	L8 [label="global_average_pooling3d_1
+N/A" shape=box]
+	L9 [label="dropout_1
+N/A" shape=box]
+	L10 [label="dense_2
+N/A" shape=box]
+	L11 [label="dense_3
+N/A" shape=box]
+	L0 -> L1
+	L1 -> L2
+	L2 -> L3
+	L3 -> L4
+	L4 -> L5
+	L5 -> L6
+	L6 -> L7
+	L7 -> L8
+	L8 -> L9
+	L9 -> L10
+	L10 -> L11
+}
