@@ -1,75 +1,98 @@
 # file: train/train_t1.py
-# description: Script to train the T1 Mapping model.
+# description: Script to train the T1 Mapping model using patient-grouped k-fold
+#              cross-validation. The held-out test set is never used for early
+#              stopping or threshold selection — only for final evaluation
+#              (see evaluate_t1.py).
 # author: María Victoria Anconetani
 # date: 22/02/2025
 
-from backend.preprocessing.load_t1_data import T1DataLoader  
-from backend.model.t1map_model import T1MappingCNN  
-from sklearn.utils.class_weight import compute_class_weight
-from tensorflow.keras.callbacks import EarlyStopping # type: ignore
-from tensorflow.keras.optimizers import Adam # type: ignore 
+import json
 import numpy as np
-import tensorflow as tf
-import os
+from sklearn.metrics import roc_auc_score
+from sklearn.utils.class_weight import compute_class_weight
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau # type: ignore
+from tensorflow.keras.optimizers import Adam # type: ignore
+
+from backend.preprocessing.load_t1_data import T1DataLoader
+from backend.model.t1map_model import T1MappingCNN
+from backend.utils.patient_split import find_best_threshold
+
+N_SPLITS = 5
+SEED = 42
 
 # Load dataset
-dataset_root = r"E:/CA EN CMR/T1Map_prepro/"  
-data_loader = T1DataLoader(dataset_root, batch_size=8)
-data_loader.prepare_datasets()
+dataset_root = r"E:/CA EN CMR/T1Map_prepro/"
+data_loader = T1DataLoader(dataset_root, batch_size=8, seed=SEED)
+data_loader.prepare_pools()
 
-train_dataset = data_loader.train_dataset
-test_dataset = data_loader.test_dataset
 
-# Extract labels from the training dataset
-y_train = np.concatenate([labels for _, labels in train_dataset.as_numpy_iterator()])
-unique, counts = np.unique(y_train, return_counts=True)
-unique, counts = np.unique(y_train, return_counts=True)
-print("✅ Unique Classes in y_train:", unique)
-print("✅ Class Counts:", counts)
+def class_weights_for(labels):
+    unique_classes = np.unique(labels)
+    if len(unique_classes) < 2:
+        print("🚨 WARNING: Only one class found in this fold's training data! Defaulting to equal class weights.")
+        return {0: 1.0, 1: 1.0}
 
-# Compute class weights safely
-unique_classes = np.unique(y_train)
-print("✅ Unique Classes in y_train:", unique_classes)
-print("✅ Class Counts:", np.bincount(y_train))  # Show count per class
+    weights = compute_class_weight("balanced", classes=unique_classes, y=labels)
+    return {0: weights[0] * 1.0, 1: weights[1] * 1.3}
 
-if len(unique_classes) < 2:
-    print("🚨 WARNING: Only one class found in y_train! Defaulting to equal class weights.")
-    class_weight_dict = {0: 1.0, 1: 1.0}  # Set equal weights
-else:
-    class_weights = compute_class_weight("balanced", classes=unique_classes, y=y_train)
-    print("✅ Raw Class Weights:", class_weights)  # Debugging line
 
-    class_weight_dict = {
-        0: class_weights[0] * 1.0,  
-        1: class_weights[1] * 1.3 
-    }
+fold_aucs = []
+oof_true, oof_probs = [], []
+best_fold = {"auc": -1.0, "model": None}
 
-print("✅ Adjusted Class Weights:", class_weight_dict)
+for fold_idx, train_dataset, val_dataset in data_loader.get_patient_kfold(n_splits=N_SPLITS):
+    print(f"\n===== Fold {fold_idx + 1}/{N_SPLITS} =====")
 
-# Initialize 2D CNN model
-model = T1MappingCNN()
+    y_train_fold = np.concatenate([labels for _, labels in train_dataset.as_numpy_iterator()])
+    class_weight_dict = class_weights_for(y_train_fold)
+    print("✅ Class Weights:", class_weight_dict)
 
-# Compile model
-model.model.compile(
-    optimizer=Adam(learning_rate=1e-4),  # Adjust learning rate if needed
-    loss="binary_crossentropy",
-    metrics=["accuracy"]
-)
+    # Fresh model per fold
+    model = T1MappingCNN()
+    model.model.compile(
+        optimizer=Adam(learning_rate=1e-4),
+        loss="binary_crossentropy",
+        metrics=["accuracy"]
+    )
 
-# Add EarlyStopping to prevent overfitting
-early_stopping = EarlyStopping(
-    monitor="val_loss", patience=10, restore_best_weights=True
-)
+    callbacks = [
+        EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True),
+        ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=3, verbose=1),
+    ]
 
-# Train model
-history = model.model.fit(
-    train_dataset,
-    validation_data=test_dataset,
-    epochs=100,  
-    class_weight=class_weight_dict,  
-    callbacks=[early_stopping]
-)
+    model.model.fit(
+        train_dataset,
+        validation_data=val_dataset,
+        epochs=100,
+        class_weight=class_weight_dict,
+        callbacks=callbacks,
+    )
 
-# Save trained model
-model.model.save("t1_mapping_cnn_model.h5")
+    y_val = np.concatenate([labels for _, labels in val_dataset.as_numpy_iterator()])
+    y_val_probs = model.model.predict(val_dataset, verbose=0).flatten()
+
+    fold_auc = roc_auc_score(y_val, y_val_probs)
+    print(f"✅ Fold {fold_idx + 1} Validation AUC: {fold_auc:.4f}")
+
+    fold_aucs.append(fold_auc)
+    oof_true.append(y_val)
+    oof_probs.append(y_val_probs)
+
+    if fold_auc > best_fold["auc"]:
+        best_fold = {"auc": fold_auc, "model": model.model}
+
+print(f"\n✅ Cross-Validation AUC: {np.mean(fold_aucs):.4f} ± {np.std(fold_aucs):.4f}")
+
+# Select the decision threshold from pooled out-of-fold validation predictions only
+# (the held-out test set is never touched here).
+oof_true = np.concatenate(oof_true)
+oof_probs = np.concatenate(oof_probs)
+best_threshold, best_f1 = find_best_threshold(oof_true, oof_probs)
+print(f"✅ Threshold selected from out-of-fold validation predictions: {best_threshold:.3f} (F1={best_f1:.4f})")
+
+# Save the best-performing fold's model and the validation-selected threshold
+best_fold["model"].save("t1_mapping_cnn_model.h5")
+with open("t1_mapping_cnn_threshold.json", "w") as f:
+    json.dump({"threshold": best_threshold}, f)
+
 print("✅ Model Trained & Saved Successfully")

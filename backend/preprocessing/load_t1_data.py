@@ -8,8 +8,14 @@ import numpy as np
 import pydicom
 import tensorflow as tf
 
+from backend.utils.patient_split import (
+    extract_patient_id,
+    patient_kfold_splits,
+    assert_no_patient_leakage,
+)
+
 class T1DataLoader:
-    def __init__(self, dataset_root, input_shape=(256, 256, 1), batch_size=8):
+    def __init__(self, dataset_root, input_shape=(256, 256, 1), batch_size=8, seed=42):
         """
         Initializes the DICOM data loader for CNN training.
 
@@ -17,10 +23,12 @@ class T1DataLoader:
             dataset_root (str): Path to the dataset folder containing train_casos, train_controles, etc.
             input_shape (tuple): Expected shape of input images (H, W, Channels).
             batch_size (int): Batch size for TensorFlow dataset.
+            seed (int): Seed for shuffling and k-fold splitting, for reproducibility.
         """
         self.dataset_root = dataset_root
         self.input_shape = input_shape
         self.batch_size = batch_size
+        self.seed = seed
 
         # Define dataset paths
         self.train_case_dir = os.path.join(dataset_root, "train_casos")
@@ -60,14 +68,14 @@ class T1DataLoader:
 
     def load_dataset_from_folder(self, folder_path, label):
         """
-        Loads all DICOM files from a folder and assigns a label.
+        Loads all DICOM files from a folder and assigns a label and patient ID.
 
         Args:
             folder_path (str): Path to the folder containing DICOM files.
             label (int): Label for the class (0 or 1).
 
         Returns:
-            list: List of (image, label) tuples.
+            list: List of (image, label, patient_id) tuples.
         """
         dataset = []
         print(f"📂 Checking folder: {folder_path}")
@@ -80,61 +88,66 @@ class T1DataLoader:
         for root, _, files in os.walk(folder_path):
             for file in files:
                 file_path = os.path.join(root, file)
-                
+
                 # Ensure the file has a valid DICOM extension or try reading anyway
-                if file.lower().endswith(('.dcm', '')):  
+                if file.lower().endswith(('.dcm', '')):
                     img_array = self.load_dicom(file_path)
                     if img_array is not None:
-                        dataset.append((img_array, label))
+                        dataset.append((img_array, label, extract_patient_id(file)))
                         file_count += 1
 
         print(f"✅ Loaded {file_count} images from {folder_path} (Label {label})")
         return dataset
 
-    def prepare_datasets(self):
+    def _to_tf_dataset(self, X, y, shuffle=True):
+        dataset = tf.data.Dataset.from_tensor_slices((X, y))
+        if shuffle:
+            dataset = dataset.shuffle(len(X), seed=self.seed)
+        return dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
+
+    def prepare_pools(self):
         """
-        Loads and preprocesses the dataset, converting it into TensorFlow datasets.
+        Loads the train/val pool (train_casos + train_controles) and the held-out
+        test set (test_casos + test_controles), and verifies that no patient appears
+        in both — so the test set stays uncontaminated by patients used for model
+        selection (training, early stopping, threshold tuning).
         """
-        # Load datasets
-        train_cases = self.load_dataset_from_folder(self.train_case_dir, 1)
-        train_controls = self.load_dataset_from_folder(self.train_control_dir, 0)
-        test_cases = self.load_dataset_from_folder(self.test_case_dir, 1)
-        test_controls = self.load_dataset_from_folder(self.test_control_dir, 0)
+        pool = self.load_dataset_from_folder(self.train_case_dir, 1) + \
+            self.load_dataset_from_folder(self.train_control_dir, 0)
+        test_data = self.load_dataset_from_folder(self.test_case_dir, 1) + \
+            self.load_dataset_from_folder(self.test_control_dir, 0)
 
-        train_data = train_cases + train_controls
-        test_data = test_cases + test_controls
-
-        print(f"✅ Loaded Training Data: {len(train_data)} samples")
-        print(f"✅ Loaded Test Data: {len(test_data)} samples")
-
-        # Ensure both classes exist in training
-        y_train = [label for _, label in train_data]
-        if 0 not in y_train or 1 not in y_train:
-            raise ValueError("🚨 ERROR: Both classes must be present in training")
-        # Shuffle training data
-        np.random.shuffle(train_data)
-
-        print(f"✅ Training Samples: {len(train_data)}")
-        print(f"✅ Test Samples: {len(test_data)}")
-
-        if not train_data:
-            raise ValueError("🚨 ERROR: No training data found! Check dataset path and file format.")
+        if not pool:
+            raise ValueError("🚨 ERROR: No train/val pool data found! Check dataset path and file format.")
         if not test_data:
             raise ValueError("🚨 ERROR: No test data found! Check dataset path and file format.")
 
-        # Convert to NumPy arrays
-        X_train, y_train = zip(*train_data)
-        X_test, y_test = zip(*test_data)
+        pool_images, pool_labels, pool_patients = zip(*pool)
+        test_images, test_labels, test_patients = zip(*test_data)
 
-        X_train, y_train = np.array(X_train), np.array(y_train)
-        X_test, y_test = np.array(X_test), np.array(y_test)
+        assert_no_patient_leakage(pool_patients, test_patients, dataset_name="T1 mapping")
 
-        # Convert to TensorFlow datasets
-        def convert_to_tf_dataset(X, y):
-            dataset = tf.data.Dataset.from_tensor_slices((X, y))
-            return dataset.shuffle(len(X)).batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
+        if len(np.unique(pool_labels)) < 2:
+            raise ValueError("🚨 ERROR: Both classes must be present in the train/val pool")
 
-        self.train_dataset = convert_to_tf_dataset(X_train, y_train)
-        self.test_dataset = convert_to_tf_dataset(X_test, y_test)
+        self.pool_images = np.array(pool_images)
+        self.pool_labels = np.array(pool_labels)
+        self.pool_patients = np.array(pool_patients)
 
-        print(f"✅ Data Loaded: {len(X_train)} training samples, {len(X_test)} test samples")
+        self.test_dataset = self._to_tf_dataset(np.array(test_images), np.array(test_labels), shuffle=False)
+
+        print(f"✅ Train/Val Pool: {len(self.pool_images)} images from {len(set(pool_patients))} patients")
+        print(f"✅ Held-out Test: {len(test_images)} images from {len(set(test_patients))} patients")
+
+    def get_patient_kfold(self, n_splits=5):
+        """
+        Yields (fold_idx, train_dataset, val_dataset) for patient-grouped,
+        label-stratified k-fold cross-validation over the train/val pool.
+        No patient is ever split across the train and val side of a fold,
+        and the held-out test set is never involved.
+        """
+        splits = patient_kfold_splits(self.pool_labels, self.pool_patients, n_splits=n_splits, seed=self.seed)
+        for fold_idx, (train_idx, val_idx) in enumerate(splits):
+            train_ds = self._to_tf_dataset(self.pool_images[train_idx], self.pool_labels[train_idx])
+            val_ds = self._to_tf_dataset(self.pool_images[val_idx], self.pool_labels[val_idx], shuffle=False)
+            yield fold_idx, train_ds, val_ds

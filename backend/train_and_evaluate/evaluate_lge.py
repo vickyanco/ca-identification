@@ -3,21 +3,32 @@
 # author: María Victoria Anconetani
 # date: 20/02/2025
 
+import json
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
 from backend.preprocessing.load_lge_data import LGEDataLoader
 
-# Load dataset
+# Load dataset (test set only — never used during training or threshold selection)
 dataset_root = "E:/CA EN CMR/LGE_prep_nii_divided"
 data_loader = LGEDataLoader(dataset_root)
-data_loader.prepare_datasets()
+data_loader.prepare_pools()
 
 test_dataset = data_loader.test_dataset
 
 # Load trained model
 model = tf.keras.models.load_model("lge_cnn_model.h5")
+
+# Load the decision threshold selected from out-of-fold validation predictions during training
+try:
+    with open("lge_cnn_threshold.json") as f:
+        threshold = json.load(f)["threshold"]
+except FileNotFoundError:
+    threshold = 0.5
+    print("⚠️ No saved threshold found (run train_lge.py first); defaulting to 0.5")
+
+print(f"ℹ️ Using decision threshold selected from validation: {threshold:.3f}")
 
 # Evaluate model
 y_true, y_pred_probs = [], []
@@ -28,7 +39,7 @@ for images, labels in test_dataset:
 
 y_true = np.array(y_true)
 y_pred_probs = np.array(y_pred_probs)
-y_pred_labels = (y_pred_probs > 0.48).astype(int)
+y_pred_labels = (y_pred_probs >= threshold).astype(int)
 
 # Compute Metrics
 accuracy = accuracy_score(y_true, y_pred_labels)
