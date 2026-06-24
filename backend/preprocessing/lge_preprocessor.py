@@ -7,6 +7,7 @@ import os
 import numpy as np
 import nibabel as nib
 from scipy.ndimage import zoom
+from backend.config import DATA_ROOT
 
 def preprocess_nifti(file_path, target_shape=(172, 192, 12)):
     """Loads a NIfTI file, resizes it to the target shape, normalizes with Z- score normalization, and returns a new NIfTI image."""
@@ -68,6 +69,6 @@ def process_nifti_folder(input_folder, output_folder, target_shape=(172, 192, 12
             print(f"Error processing {file}: {e}")
 
 # Example usage
-input_folder = "E:/CA EN CMR/DE_SS_EC_tfi_psir_p2_PSIR_nii"  
-output_folder = "E:/CA EN CMR/LGE_prep_nii"  
+input_folder = os.path.join(DATA_ROOT, "DE_SS_EC_tfi_psir_p2_PSIR_nii")
+output_folder = os.path.join(DATA_ROOT, "LGE_prep_nii")
 process_nifti_folder(input_folder, output_folder)

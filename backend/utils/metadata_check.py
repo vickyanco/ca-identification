@@ -6,7 +6,9 @@
 import pydicom
 import os
 
-dicom_folder = r"E:/CA EN CMR/T1Map T1 4cam_dcm/p1_control_1"  # Change to an actual folder
+from backend.config import DATA_ROOT
+
+dicom_folder = os.path.join(DATA_ROOT, "T1Map T1 4cam_dcm", "p1_control_1")  # Change to an actual folder
 
 dicom_files = sorted([f for f in os.listdir(dicom_folder) if os.path.isfile(os.path.join(dicom_folder, f))])
 

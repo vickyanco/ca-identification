@@ -6,6 +6,8 @@
 import os
 import nibabel as nib
 
+from backend.config import DATA_ROOT
+
 def print_nifti_shapes(folder_path):
     """Prints the shape of all NIfTI (.nii or .nii.gz) files inside a folder."""
     
@@ -27,6 +29,6 @@ def print_nifti_shapes(folder_path):
             print(f"Error loading {file}: {e}")
 
 # Example usage
-folder_path = "E:/CA EN CMR/DE_SS_EC_tfi_psir_p2_PSIR_nii"  
+folder_path = os.path.join(DATA_ROOT, "DE_SS_EC_tfi_psir_p2_PSIR_nii")
 print_nifti_shapes(folder_path)
 

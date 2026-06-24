@@ -3,17 +3,21 @@
 # author: María Victoria Anconetani
 # date: 12/02/2025
 
+import os
+
 from preprocessing.lge_preprocessor import LGEPreprocessor
 from preprocessing.t1map_preprocessor import T1Preprocessor
 from utils.data_loader_augmentation import DataLoader
 from model.lge_model import LGEModel
 from model.t1map_model import T1Model
 import tensorflow as tf
+from backend.config import DATA_ROOT
+
 # Paths to Data
-lge_cases_path = "E:/CA EN CMR/lge-casos-nifti"
-lge_controls_path = "E:/CA EN CMR/lge-controles-nifti"
-t1_cases_path = "E:/CA EN CMR/t1_mapping_corregido/casos/"
-t1_controls_path = "E:/CA EN CMR/t1_mapping_corregido/controles/"
+lge_cases_path = os.path.join(DATA_ROOT, "lge-casos-nifti")
+lge_controls_path = os.path.join(DATA_ROOT, "lge-controles-nifti")
+t1_cases_path = os.path.join(DATA_ROOT, "t1_mapping_corregido", "casos")
+t1_controls_path = os.path.join(DATA_ROOT, "t1_mapping_corregido", "controles")
 
 # Instantiate preprocessors with target shape
 lge_preprocessor = LGEPreprocessor(target_shape=(172, 192, 12))

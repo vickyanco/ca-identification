@@ -4,14 +4,16 @@
 # date: 20/02/2025
 
 import json
+import os
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, roc_curve
+from backend.config import DATA_ROOT
 from backend.preprocessing.load_t1_data import T1DataLoader
 
 # Load dataset (test set only — never used during training or threshold selection)
-dataset_root = "E:/CA EN CMR/T1Map_prepro/"
+dataset_root = os.path.join(DATA_ROOT, "T1Map_prepro")
 data_loader = T1DataLoader(dataset_root)
 data_loader.prepare_pools()
 

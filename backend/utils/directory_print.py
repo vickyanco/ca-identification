@@ -6,6 +6,8 @@
 import os
 import shutil
 
+from backend.config import DATA_ROOT
+
 def duplicate_and_rename(source_dir, target_dir):
     """
     Duplicates a folder structure while renaming DICOM files uniquely.
@@ -45,8 +47,8 @@ def duplicate_and_rename(source_dir, target_dir):
             print(f"Copied: {old_file_path} -> {new_file_path}")
 
 # Set source and target directories
-source_directory = "E:/CA EN CMR/T1Map T1 4cam_dcm_div"
-target_directory = "E:/CA EN CMR/T1Map_re"
+source_directory = os.path.join(DATA_ROOT, "T1Map T1 4cam_dcm_div")
+target_directory = os.path.join(DATA_ROOT, "T1Map_re")
 
 # Run the duplication process
 duplicate_and_rename(source_directory, target_directory)

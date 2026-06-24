@@ -7,12 +7,14 @@
 # date: 20/02/2025
 
 import json
+import os
 import numpy as np
 from sklearn.metrics import roc_auc_score
 from sklearn.utils.class_weight import compute_class_weight
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau # type: ignore
 from tensorflow.keras.optimizers import Adam # type: ignore
 
+from backend.config import DATA_ROOT
 from backend.preprocessing.load_lge_data import LGEDataLoader
 from backend.model.lge_model import LGE_CNN
 from backend.utils.patient_split import find_best_threshold
@@ -21,7 +23,7 @@ N_SPLITS = 5
 SEED = 42
 
 # Load dataset
-dataset_root = "E:/CA EN CMR/LGE_prep_nii_divided"
+dataset_root = os.path.join(DATA_ROOT, "LGE_prep_nii_divided")
 data_loader = LGEDataLoader(dataset_root, seed=SEED)
 data_loader.prepare_pools()
 

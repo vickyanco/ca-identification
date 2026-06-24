@@ -6,6 +6,8 @@
 import os
 import subprocess
 
+from backend.config import DATA_ROOT
+
 def convert_all_to_nifti(input_folder, output_folder):
     """
     Recursively searches for DICOM folders and converts them to NIfTI using dcm2niix,
@@ -35,10 +37,10 @@ def convert_all_to_nifti(input_folder, output_folder):
         ], check=True)
 
 if __name__ == "__main__":
-    input_folder_2 = r"E:/CA EN CMR/T1Map T1 4cam_dcm"
-    input_folder = r"E:/CA EN CMR/DE_SS_EC_tfi_psir_p2_PSIR_dcm"
-    output_folder_2 = r"E:/CA EN CMR/T1Map T1 4cam_nii"
-    output_folder = r"E:/CA EN CMR/DE_SS_EC_tfi_psir_p2_PSIR_nii"   
+    input_folder_2 = os.path.join(DATA_ROOT, "T1Map T1 4cam_dcm")
+    input_folder = os.path.join(DATA_ROOT, "DE_SS_EC_tfi_psir_p2_PSIR_dcm")
+    output_folder_2 = os.path.join(DATA_ROOT, "T1Map T1 4cam_nii")
+    output_folder = os.path.join(DATA_ROOT, "DE_SS_EC_tfi_psir_p2_PSIR_nii")
 
     convert_all_to_nifti(input_folder, output_folder)
     print("✅ NIfTI conversion completed! All files are in:", output_folder)

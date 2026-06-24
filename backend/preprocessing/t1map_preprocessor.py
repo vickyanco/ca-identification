@@ -8,6 +8,7 @@ import numpy as np
 import pydicom
 import cv2
 from tqdm import tqdm
+from backend.config import DATA_ROOT
 
 def normalize_zscore(img):
     """ Apply Z-Score Normalization without rescaling. """
@@ -69,8 +70,8 @@ def preprocess_dicom_images(source_dir, target_dir, img_size=(256, 256)):
                 print(f"⚠️ Error processing {old_file_path}: {e}")
 
 # Set source and target directories
-source_directory = "E:/CA EN CMR/T1Map_re"
-target_directory = "E:/CA EN CMR/T1Map_pre"
+source_directory = os.path.join(DATA_ROOT, "T1Map_re")
+target_directory = os.path.join(DATA_ROOT, "T1Map_pre")
 
 # Run the preprocessing function
 preprocess_dicom_images(source_directory, target_directory)

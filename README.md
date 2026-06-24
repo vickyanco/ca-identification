@@ -37,6 +37,12 @@ After additional validation and testing, this AI-based solution could be deploye
    ```bash
    git clone https://github.com/vickyanco/ca-cmr.git
 
+2. Configure the dataset location by copying `.env.example` to `.env` and setting `CA_DATA_ROOT` to the path of your local dataset folder:
+
+   ```bash
+   cp .env.example .env
+   ```
+
 ### License
 
 This project is licensed under the MIT License - see the LICENSE file for details.

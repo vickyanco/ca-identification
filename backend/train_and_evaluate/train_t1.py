@@ -7,12 +7,14 @@
 # date: 22/02/2025
 
 import json
+import os
 import numpy as np
 from sklearn.metrics import roc_auc_score
 from sklearn.utils.class_weight import compute_class_weight
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau # type: ignore
 from tensorflow.keras.optimizers import Adam # type: ignore
 
+from backend.config import DATA_ROOT
 from backend.preprocessing.load_t1_data import T1DataLoader
 from backend.model.t1map_model import T1MappingCNN
 from backend.utils.patient_split import find_best_threshold
@@ -21,7 +23,7 @@ N_SPLITS = 5
 SEED = 42
 
 # Load dataset
-dataset_root = r"E:/CA EN CMR/T1Map_prepro/"
+dataset_root = os.path.join(DATA_ROOT, "T1Map_prepro")
 data_loader = T1DataLoader(dataset_root, batch_size=8, seed=SEED)
 data_loader.prepare_pools()
 
